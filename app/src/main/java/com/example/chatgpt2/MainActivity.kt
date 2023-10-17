@@ -94,7 +94,6 @@ class MainActivity : AppCompatActivity() {
         binding.editSend.setText("")
         val message = content.toUserMessage()
         adapter.addData(message)
-        keepListBottom()
         generateResult(adapter.data)
     }
 
@@ -120,7 +119,6 @@ class MainActivity : AppCompatActivity() {
             .build()
         adapter.addData("".toAssistantMessage())
         var isGenerateFinish = false
-        var tmp = true
         openAI?.streamChatCompletionAsync(
             request,
             onResponse = {
@@ -129,13 +127,7 @@ class MainActivity : AppCompatActivity() {
                     if (adapter.data.isNotEmpty()) {
                         val lastIndex = adapter.data.size - 1
                         adapter.data[lastIndex] = it.choices[0].message
-                        if (tmp || isGenerateFinish) {
-                            tmp = false
-                            adapter.notifyItemChanged(lastIndex)
-                            keepListBottom()
-                            delay(200)
-                            tmp = true
-                        }
+                        adapter.notifyItemChanged(lastIndex)
                     }
                 }
             },
@@ -146,7 +138,6 @@ class MainActivity : AppCompatActivity() {
                         val lastIndex = adapter.data.size - 1
                         adapter.data[lastIndex] = it.stackTraceToString().toSystemMessage()
                         adapter.notifyItemChanged(lastIndex)
-                        keepListBottom()
                     }
                 }
             }
@@ -157,12 +148,5 @@ class MainActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         RepUtils.messages = adapter.data
-    }
-
-    private fun keepListBottom() {
-        val manager = binding.rv.layoutManager as LinearLayoutManager
-        if (manager.findLastCompletelyVisibleItemPosition() != manager.itemCount - 1) {
-            binding.rv.scrollToPosition(manager.itemCount - 1)
-        }
     }
 }
