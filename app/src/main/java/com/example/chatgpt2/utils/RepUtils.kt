@@ -2,6 +2,7 @@ package com.example.chatgpt2.utils
 
 import android.util.Log
 import com.cjcrafter.openai.chat.ChatMessage
+import com.cjcrafter.openai.chat.ChatModel
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
@@ -16,6 +17,7 @@ import okhttp3.RequestBody
 
 object RepUtils {
     private const val DEFAULT_API_HOST = "https://api.chatanywhere.com.cn/"
+    private val DEFAULT_MODEL = ChatModel.GPT_3_5_TURBO_0613.string
     private val mmkv = MMKV.defaultMMKV()
     private val gson = Gson()
     var apiKey: String
@@ -84,4 +86,20 @@ object RepUtils {
 
         return total - used
     }
+
+    fun getModelList(): List<String> {
+        return enumValues<ChatModel>().map {
+            it.string
+        }
+    }
+
+    var modelString: String
+        get() {
+            return mmkv.decodeString("modelString", DEFAULT_MODEL) ?: DEFAULT_MODEL
+        }
+        set(value) {
+            if (value in getModelList()) {
+                mmkv.encode("modelString", value)
+            }
+        }
 }

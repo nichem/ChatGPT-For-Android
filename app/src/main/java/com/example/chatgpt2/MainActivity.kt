@@ -47,6 +47,7 @@ class MainActivity : AppCompatActivity() {
         binding.btnSetting.setOnClickListener {
             showSetting {
                 openAI = OpenAI(RepUtils.apiKey, RepUtils.apiHost)
+                binding.tvModel.text = RepUtils.modelString
             }
         }
 
@@ -81,6 +82,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         binding.rv.itemAnimator = null
+        binding.tvModel.text = RepUtils.modelString
     }
 
     private suspend fun refresh() {
@@ -114,7 +116,7 @@ class MainActivity : AppCompatActivity() {
     private suspend fun generateResult(messages: MutableList<ChatMessage>) {
         val request = ChatRequest.builder()
             .messages(messages)
-            .model(ChatModel.GPT_3_5_TURBO_0613.string)
+            .model(RepUtils.modelString)
             .build()
         adapter.addData("".toAssistantMessage())
         var isGenerateFinish = false

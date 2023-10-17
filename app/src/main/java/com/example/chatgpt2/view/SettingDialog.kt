@@ -5,7 +5,9 @@ import androidx.lifecycle.lifecycleScope
 import com.example.chatgpt2.R
 import com.example.chatgpt2.databinding.DialogSettingBinding
 import com.example.chatgpt2.utils.RepUtils
+import com.lxj.xpopup.XPopup
 import com.lxj.xpopup.core.CenterPopupView
+import com.lxj.xpopup.interfaces.OnSelectListener
 import kotlinx.coroutines.launch
 
 class SettingDialog(context: Context, private val onSave: () -> Unit) : CenterPopupView(context) {
@@ -29,6 +31,16 @@ class SettingDialog(context: Context, private val onSave: () -> Unit) : CenterPo
         binding.btnRefresh.setOnClickListener {
             updateBalance()
         }
+
+        binding.tvModel.setOnClickListener {
+            val modelList = RepUtils.getModelList().toTypedArray()
+            XPopup.Builder(context)
+                .atView(binding.tvModel)
+                .asAttachList(modelList, IntArray(modelList.size) { 0 }) { _, text ->
+                    binding.tvModel.text = text
+                }
+                .show()
+        }
     }
 
     private fun updateBalance() = lifecycleScope.launch {
@@ -41,11 +53,13 @@ class SettingDialog(context: Context, private val onSave: () -> Unit) : CenterPo
     private fun saveValues() {
         RepUtils.apiHost = binding.editHost.text.toString()
         RepUtils.apiKey = binding.editKey.text.toString()
+        RepUtils.modelString = binding.tvModel.text.toString()
     }
 
     private fun initValues() {
         binding.editKey.setText(RepUtils.apiKey)
         binding.editHost.setText(RepUtils.apiHost)
+        binding.tvModel.text = RepUtils.modelString
     }
 
 }
