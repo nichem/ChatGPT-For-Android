@@ -69,14 +69,15 @@ object RepUtils {
         val res = withContext(Default) { okHttpClient.newCall(request).execute() }
         val data = res.body?.string() ?: "{}"
 //        Log.d("dl", data)
-        val json = JsonParser.parseString(data).asJsonObject
         val total = try {
+            val json = JsonParser.parseString(data).asJsonObject
             json.get("balanceTotal").asFloat
         } catch (e: Exception) {
             Log.e("dl", e.stackTraceToString())
             0f
         }
         val used = try {
+            val json = JsonParser.parseString(data).asJsonObject
             json.get("balanceUsed").asFloat
         } catch (e: Exception) {
             Log.e("dl", e.stackTraceToString())
