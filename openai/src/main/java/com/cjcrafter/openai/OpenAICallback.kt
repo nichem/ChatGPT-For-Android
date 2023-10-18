@@ -30,8 +30,8 @@ internal class OpenAICallback(
             handleStream(response)
             return
         }
-
-        val rootObject = JsonParser.parseString(response.body!!.string()).asJsonObject
+        val text = response.body!!.string()
+        val rootObject = JsonParser.parseString(text).asJsonObject
 
         // Sometimes OpenAI will respond with an error code for malformed
         // requests, timeouts, rate limits, etc. We need to let the dev

@@ -7,8 +7,11 @@ import com.cjcrafter.openai.completions.CompletionResponse
 import com.cjcrafter.openai.completions.CompletionResponseChunk
 import com.cjcrafter.openai.exception.OpenAIError
 import com.cjcrafter.openai.exception.WrappedIOError
-import com.cjcrafter.openai.gson.ChatUserAdapter
-import com.cjcrafter.openai.gson.FinishReasonAdapter
+import com.cjcrafter.openai.gson.*
+import com.cjcrafter.openai.image.ImageFormat
+import com.cjcrafter.openai.image.ImageGenerateRequest
+import com.cjcrafter.openai.image.ImageResponse
+import com.cjcrafter.openai.image.ImageSize
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.*
@@ -385,6 +388,25 @@ open class OpenAI @JvmOverloads constructor(
         })
     }
 
+    @JvmOverloads
+    fun imageGeneration(
+        request: ImageGenerateRequest,
+        onResponse: (ImageResponse) -> Unit,
+        onFailure: (OpenAIError) -> Unit = { it.printStackTrace() }
+    ) {
+        val httpRequest = buildRequest(request, IMAGE_CREATE_ENDPOINT)
+        try {
+            val res = client.newCall(httpRequest).execute()
+
+            OpenAICallback(false, onFailure = onFailure) {
+                val imageResponse = gson.fromJson(it, ImageResponse::class.java)
+                onResponse.invoke(imageResponse)
+            }.onResponse(res)
+        } catch (ex: IOException) {
+            onFailure.invoke(WrappedIOError(ex))
+        }
+    }
+
 
     companion object {
 
@@ -426,6 +448,8 @@ open class OpenAI @JvmOverloads constructor(
                 .registerTypeAdapter(ChatUser::class.java, ChatUserAdapter())
                 .registerTypeAdapter(FinishReason::class.java, FinishReasonAdapter())
                 .registerTypeAdapter(ChatChoiceChunk::class.java, ChatChoiceChunkAdapter())
+                .registerTypeAdapter(ImageSize::class.java, ImageSizeAdapter())
+                .registerTypeAdapter(ImageFormat::class.java, ImageFormatAdapter())
         }
     }
 }

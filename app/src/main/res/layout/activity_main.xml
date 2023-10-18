@@ -31,6 +31,14 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
+        android:id="@+id/btnImageGenerate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/baseline_image_24"
+        app:layout_constraintBottom_toTopOf="@id/btnWeb"
+        app:layout_constraintRight_toRightOf="parent" />
+
+    <ImageButton
         android:id="@+id/btnWeb"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
