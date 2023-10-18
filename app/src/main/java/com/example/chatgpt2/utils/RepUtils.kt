@@ -11,9 +11,13 @@ import com.tencent.mmkv.MMKV
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.withContext
 import okhttp3.FormBody
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
+import okio.ByteString.Companion.encode
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 
 object RepUtils {
     private const val DEFAULT_API_HOST = "https://api.chatanywhere.com.cn/"
@@ -103,4 +107,28 @@ object RepUtils {
                 mmkv.encode("modelString", value)
             }
         }
+
+    suspend fun search(key: String): String {
+        val url = "https://cn.bing.com/search?q=$key"
+        val okHttpClient = OkHttpClient()
+        val request = Request.Builder()
+            .url(url)
+            .addHeader(
+                "User-Agent",
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36 Edg/118.0.2088.46"
+            )
+            .build()
+        val html = withContext(Default) {
+            okHttpClient.newCall(request).execute().body?.string() ?: ""
+        }
+        val element = Jsoup.parse(html).body().getElementById("b_content") ?: return ""
+        var content = ""
+        val results = element.select("#b_results li")
+        for (i in 0 until results.size) {
+            val result = results[i]
+            if (result.text().isNotBlank()) content += "${result.text()}\n"
+        }
+        return content
+    }
+
 }

@@ -81,6 +81,18 @@ class MainActivity : AppCompatActivity() {
                 adapter.notifyDataSetChanged()
             }
         }
+
+        binding.btnWeb.setOnClickListener {
+            lifecycleScope.launch {
+                enableBtnSend(false)
+                val r = RepUtils.search(binding.editSend.text.toString())
+                binding.editSend.setText("")
+                adapter.addData(r.toUserMessage())
+                adapter.addData("分析一下上述信息".toUserMessage())
+                generateResult(adapter.data)
+                enableBtnSend(true)
+            }
+        }
         binding.rv.itemAnimator = null
         binding.tvModel.text = RepUtils.modelString
     }
@@ -110,6 +122,8 @@ class MainActivity : AppCompatActivity() {
     private fun enableBtnSend(isEnable: Boolean) {
         binding.btnSend.isEnabled = isEnable
         binding.btnSend.setImageResource(if (isEnable) R.drawable.baseline_send_24 else R.drawable.baseline_more_horiz_24)
+        binding.btnWeb.isEnabled = isEnable
+        binding.btnWeb.setImageResource(if (isEnable) R.drawable.baseline_search_24 else R.drawable.baseline_more_horiz_24)
     }
 
     private suspend fun generateResult(messages: MutableList<ChatMessage>) {
