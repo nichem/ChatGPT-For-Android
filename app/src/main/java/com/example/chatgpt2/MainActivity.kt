@@ -5,14 +5,12 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Base64
 import android.util.Log
-import android.view.View
-import android.widget.ImageButton
-import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.blankj.utilcode.util.CleanUtils
 import com.blankj.utilcode.util.FileUtils
+import com.blankj.utilcode.util.PathUtils
+import com.blankj.utilcode.util.ToastUtils
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.chad.library.adapter.base.BaseQuickAdapter
@@ -72,12 +70,30 @@ class MainActivity : AppCompatActivity() {
                 enableSendMessage(true)
             }
         }
-        adapter.addChildClickViewIds(R.id.btnRefresh)
-        adapter.setOnItemChildClickListener { _, _, pos ->
-            lifecycleScope.launch {
-                enableSendMessage(false)
-                refresh()
-                enableSendMessage(true)
+        adapter.addChildClickViewIds(R.id.btnRefresh, R.id.btnSave)
+        adapter.setOnItemChildClickListener { _, v, pos ->
+            when (v.id) {
+                R.id.btnRefresh -> lifecycleScope.launch {
+                    enableSendMessage(false)
+                    refresh()
+                    enableSendMessage(true)
+                }
+                R.id.btnSave -> lifecycleScope.launch {
+                    val loading = showLoading("保存中")
+                    val chatMessage = adapter.data[pos]
+                    val filename = chatMessage.content.replace(IMAGE_START, "")
+                    var isSave = false
+                    val destFile = File(PathUtils.getExternalDownloadsPath(), filename)
+                    withContext(IO) {
+                        val file = File(cacheDir, filename)
+                        isSave = FileUtils.copy(
+                            file,
+                            destFile
+                        )
+                    }
+                    loading.dismiss()
+                    ToastUtils.showShort(if (isSave) "图片保存至${destFile.path}" else "保存至${destFile.path}失败")
+                }
             }
         }
         adapter.setOnItemLongClickListener { _, _, pos ->
@@ -151,11 +167,14 @@ class MainActivity : AppCompatActivity() {
             override fun convert(holder: BaseViewHolder, item: ChatMessage) {
                 holder.setGone(R.id.imageView, true)
                 holder.setVisible(R.id.tvContent, true)
+                holder.setVisible(R.id.btnRefresh, false)
+                holder.setVisible(R.id.btnSave, false)
                 if (item.isImageGenerationMessage()) {
                     when (item.role) {
                         ChatUser.ASSISTANT -> {
                             holder.setVisible(R.id.tvContent, false)
                             holder.setGone(R.id.imageView, false)
+                            holder.setVisible(R.id.btnSave, true)
                             val filename = item.content.replace(IMAGE_START, "")
                             Glide.with(context)
                                 .load(File(cacheDir, filename))
@@ -167,16 +186,18 @@ class MainActivity : AppCompatActivity() {
                         }
                         else -> {
                             holder.setText(R.id.tvContent, item.content)
-                            holder.getView<ImageButton>(R.id.btnRefresh).visibility =
-                                if (item.role.name == ChatUser.SYSTEM.name && holder.adapterPosition == itemCount - 1)
-                                    View.VISIBLE else View.INVISIBLE
+                            holder.setVisible(
+                                R.id.btnRefresh,
+                                item.role == ChatUser.SYSTEM && holder.adapterPosition == itemCount - 1
+                            )
                         }
                     }
                 } else {
                     holder.setText(R.id.tvContent, "${item.role.name}:${item.content}")
-                    holder.getView<ImageButton>(R.id.btnRefresh).visibility =
-                        if (item.role.name == ChatUser.SYSTEM.name && holder.adapterPosition == itemCount - 1)
-                            View.VISIBLE else View.INVISIBLE
+                    holder.setVisible(
+                        R.id.btnRefresh,
+                        item.role == ChatUser.SYSTEM && holder.adapterPosition == itemCount - 1
+                    )
                 }
             }
         }
