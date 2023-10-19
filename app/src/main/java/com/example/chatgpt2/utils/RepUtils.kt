@@ -3,6 +3,7 @@ package com.example.chatgpt2.utils
 import android.util.Log
 import com.cjcrafter.openai.chat.ChatMessage
 import com.cjcrafter.openai.chat.ChatModel
+import com.cjcrafter.openai.image.ImageSize
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
@@ -22,6 +23,7 @@ import org.jsoup.nodes.Element
 object RepUtils {
     private const val DEFAULT_API_HOST = "https://api.chatanywhere.com.cn/"
     private val DEFAULT_MODEL = ChatModel.GPT_3_5_TURBO_0613.string
+    private val DEFAULT_IMAGE_SIZE = ImageSize.SIZE_256.string
     private val mmkv = MMKV.defaultMMKV()
     private val gson = Gson()
     var apiKey: String
@@ -130,5 +132,21 @@ object RepUtils {
         }
         return content
     }
+
+    fun getImageSizeList(): List<String> {
+        return enumValues<ImageSize>().map {
+            it.string
+        }
+    }
+
+    var imageSizeString: String
+        get() {
+            return mmkv.decodeString("imageSizeString", DEFAULT_IMAGE_SIZE) ?: DEFAULT_IMAGE_SIZE
+        }
+        set(value) {
+            if(value in getImageSizeList()){
+                mmkv.encode("imageSizeString", value)
+            }
+        }
 
 }

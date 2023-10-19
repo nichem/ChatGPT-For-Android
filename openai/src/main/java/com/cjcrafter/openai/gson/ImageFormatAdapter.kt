@@ -2,6 +2,7 @@ package com.cjcrafter.openai.gson
 
 import com.cjcrafter.openai.image.ImageFormat
 import com.cjcrafter.openai.image.ImageSize
+import com.cjcrafter.openai.image.imageFormatString2Value
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
@@ -21,10 +22,7 @@ class ImageFormatAdapter : TypeAdapter<ImageFormat?>() {
             reader.nextNull()
             null
         } else {
-            when (reader?.nextString()) {
-                "url" -> ImageFormat.URL
-                else -> ImageFormat.BASE64
-            }
+           imageFormatString2Value(reader?.nextString())
         }
     }
 }

@@ -53,8 +53,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingVertical="10dp">
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
@@ -68,7 +67,35 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:clickable="true"
+            android:drawableRight="@drawable/baseline_arrow_drop_down_24"
             android:focusable="true"
+            android:gravity="center_vertical"
+            android:paddingVertical="10dp"
+            android:textColor="@color/black" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:text="图片生成大小:"
+            android:textColor="@color/black" />
+
+        <TextView
+            android:id="@+id/tvImageSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:drawableRight="@drawable/baseline_arrow_drop_down_24"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:paddingVertical="10dp"
             android:textColor="@color/black" />
     </LinearLayout>
 

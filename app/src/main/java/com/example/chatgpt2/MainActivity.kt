@@ -25,6 +25,7 @@ import com.cjcrafter.openai.chat.ChatUser
 import com.cjcrafter.openai.image.ImageFormat
 import com.cjcrafter.openai.image.ImageGenerateRequest
 import com.cjcrafter.openai.image.ImageSize
+import com.cjcrafter.openai.image.imageSizeString2Value
 import com.example.chatgpt2.databinding.ActivityMainBinding
 import com.example.chatgpt2.utils.RepUtils
 import com.example.chatgpt2.utils.showAsk
@@ -277,7 +278,7 @@ class MainActivity : AppCompatActivity() {
         val requestBase64 = ImageGenerateRequest.Builder()
             .prompt(prompt)
             .imageFormat(ImageFormat.BASE64)
-            .imageSize(ImageSize.SIZE_256)
+            .imageSize(imageSizeString2Value(RepUtils.imageSizeString))
             .build()
         binding.editSend.setText("")
         withContext(Default) {

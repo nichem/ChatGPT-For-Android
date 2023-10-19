@@ -35,9 +35,17 @@ class SettingDialog(context: Context, private val onSave: () -> Unit) : CenterPo
         binding.tvModel.setOnClickListener {
             val modelList = RepUtils.getModelList().toTypedArray()
             XPopup.Builder(context)
-                .atView(binding.tvModel)
-                .asAttachList(modelList, IntArray(modelList.size) { 0 }) { _, text ->
+                .asBottomList("模型选择", modelList) { _, text ->
                     binding.tvModel.text = text
+                }
+                .show()
+        }
+
+        binding.tvImageSize.setOnClickListener {
+            val sizeList = RepUtils.getImageSizeList().toTypedArray()
+            XPopup.Builder(context)
+                .asBottomList("生成图片大小", sizeList) { _, text ->
+                    binding.tvImageSize.text = text
                 }
                 .show()
         }
@@ -54,12 +62,14 @@ class SettingDialog(context: Context, private val onSave: () -> Unit) : CenterPo
         RepUtils.apiHost = binding.editHost.text.toString()
         RepUtils.apiKey = binding.editKey.text.toString()
         RepUtils.modelString = binding.tvModel.text.toString()
+        RepUtils.imageSizeString = binding.tvImageSize.text.toString()
     }
 
     private fun initValues() {
         binding.editKey.setText(RepUtils.apiKey)
         binding.editHost.setText(RepUtils.apiHost)
         binding.tvModel.text = RepUtils.modelString
+        binding.tvImageSize.text = RepUtils.imageSizeString
     }
 
 }

@@ -1,6 +1,7 @@
 package com.cjcrafter.openai.gson
 
 import com.cjcrafter.openai.image.ImageSize
+import com.cjcrafter.openai.image.imageSizeString2Value
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonToken
@@ -20,11 +21,7 @@ class ImageSizeAdapter : TypeAdapter<ImageSize?>() {
             reader.nextNull()
             null
         } else {
-            when (reader?.nextString()) {
-                "256x256" -> ImageSize.SIZE_256
-                "512x512" -> ImageSize.SIZE_512
-                else -> ImageSize.SIZE_1024
-            }
+            imageSizeString2Value(reader?.nextString())
         }
     }
 
