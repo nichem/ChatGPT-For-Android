@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.blankj.utilcode.util.CleanUtils
+import com.blankj.utilcode.util.ClipboardUtils
 import com.blankj.utilcode.util.FileUtils
 import com.blankj.utilcode.util.PathUtils
 import com.blankj.utilcode.util.ToastUtils
@@ -98,9 +99,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
         adapter.setOnItemLongClickListener { _, _, pos ->
-            showAsk("是否删除词条信息？") {
-                adapter.removeAt(pos)
-            }
+            val chatMessage = adapter.data[pos]
+            ClipboardUtils.copyText(chatMessage.content)
+            ToastUtils.showShort("已复制到剪切板")
             true
         }
 
@@ -168,14 +169,14 @@ class MainActivity : AppCompatActivity() {
             override fun convert(holder: BaseViewHolder, item: ChatMessage) {
                 holder.setGone(R.id.imageView, true)
                 holder.setVisible(R.id.tvContent, true)
-                holder.setVisible(R.id.btnRefresh, false)
-                holder.setVisible(R.id.btnSave, false)
+                holder.setGone(R.id.btnRefresh, true)
+                holder.setGone(R.id.btnSave, true)
                 if (item.isImageGenerationMessage()) {
                     when (item.role) {
                         ChatUser.ASSISTANT -> {
                             holder.setVisible(R.id.tvContent, false)
                             holder.setGone(R.id.imageView, false)
-                            holder.setVisible(R.id.btnSave, true)
+                            holder.setGone(R.id.btnSave, false)
                             val filename = item.content.replace(IMAGE_START, "")
                             Glide.with(context)
                                 .load(File(cacheDir, filename))
@@ -187,17 +188,17 @@ class MainActivity : AppCompatActivity() {
                         }
                         else -> {
                             holder.setText(R.id.tvContent, item.content)
-                            holder.setVisible(
+                            holder.setGone(
                                 R.id.btnRefresh,
-                                item.role == ChatUser.SYSTEM && holder.adapterPosition == itemCount - 1
+                                !(item.role == ChatUser.SYSTEM && holder.adapterPosition == itemCount - 1)
                             )
                         }
                     }
                 } else {
                     holder.setText(R.id.tvContent, "${item.role.name}:${item.content}")
-                    holder.setVisible(
+                    holder.setGone(
                         R.id.btnRefresh,
-                        item.role == ChatUser.SYSTEM && holder.adapterPosition == itemCount - 1
+                        !(item.role == ChatUser.SYSTEM && holder.adapterPosition == itemCount - 1)
                     )
                 }
             }
