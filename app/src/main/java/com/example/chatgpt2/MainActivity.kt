@@ -77,6 +77,7 @@ class MainActivity : AppCompatActivity() {
                     enableSendMessage(false)
                     val prompt = binding.editSend.text.toString()
                     adapter.addData("$IMAGE_START$prompt".toUserMessage())
+                    adapter.notifyDataSetChanged()
                     generateImage(prompt)
                     enableSendMessage(true)
                 }
@@ -159,6 +160,7 @@ class MainActivity : AppCompatActivity() {
         binding.editSend.setText("")
         val message = content.toUserMessage()
         adapter.addData(message)
+        adapter.notifyDataSetChanged()
         generateResult(adapter.data)
     }
 
@@ -175,6 +177,10 @@ class MainActivity : AppCompatActivity() {
                             holder.setVisible(R.id.tvContent, false)
                             holder.setGone(R.id.imageView, false)
                             holder.setGone(R.id.btnSave, false)
+                            holder.setGone(
+                                R.id.btnRefresh,
+                                holder.adapterPosition != itemCount - 1
+                            )
                             val filename = item.content.replace(IMAGE_START, "")
                             Glide.with(context)
                                 .load(File(cacheDir, filename))
@@ -236,7 +242,7 @@ class MainActivity : AppCompatActivity() {
                     if (adapter.data.isNotEmpty()) {
                         val lastIndex = adapter.data.size - 1
                         adapter.data[lastIndex] = it.stackTraceToString().toSystemMessage()
-                        adapter.notifyItemChanged(lastIndex)
+                        adapter.notifyDataSetChanged()
                     }
                 }
             }
@@ -286,10 +292,12 @@ class MainActivity : AppCompatActivity() {
                 saveBitmap(bitmap, filename)
                 runOnUiThread {
                     adapter.addData("$IMAGE_START$filename".toAssistantMessage())
+                    adapter.notifyDataSetChanged()
                 }
             }, onFailure = {
                 runOnUiThread {
                     adapter.addData("$IMAGE_START${it.stackTraceToString()}".toSystemMessage())
+                    adapter.notifyDataSetChanged()
                 }
             })
         }
