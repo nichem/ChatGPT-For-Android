@@ -32,6 +32,7 @@ import com.example.chatgpt2.utils.RepUtils
 import com.example.chatgpt2.utils.showAsk
 import com.example.chatgpt2.utils.showLoading
 import com.example.chatgpt2.utils.showSetting
+import com.lxj.xpopup.XPopup
 import kotlinx.coroutines.Dispatchers.Default
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.delay
@@ -66,10 +67,19 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnSend.setOnClickListener {
             if (binding.editSend.text.isBlank()) return@setOnClickListener
-            lifecycleScope.launch {
-                enableSendMessage(false)
-                sendMessage(binding.editSend.text.toString())
-                enableSendMessage(true)
+            when (curMode) {
+                Mode.Chat -> lifecycleScope.launch {
+                    enableSendMessage(false)
+                    sendMessage(binding.editSend.text.toString())
+                    enableSendMessage(true)
+                }
+                Mode.ImageGenerate -> lifecycleScope.launch {
+                    enableSendMessage(false)
+                    val prompt = binding.editSend.text.toString()
+                    adapter.addData("$IMAGE_START$prompt".toUserMessage())
+                    generateImage(prompt)
+                    enableSendMessage(true)
+                }
             }
         }
         adapter.addChildClickViewIds(R.id.btnRefresh, R.id.btnSave)
@@ -118,28 +128,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        binding.btnWeb.setOnClickListener {
-            if (binding.editSend.text.isBlank()) return@setOnClickListener
-            lifecycleScope.launch {
-                enableSendMessage(false)
-                val r = RepUtils.search(binding.editSend.text.toString())
-                binding.editSend.setText("")
-                adapter.addData(r.toUserMessage())
-                adapter.addData("分析一下上述信息".toUserMessage())
-                generateResult(adapter.data)
-                enableSendMessage(true)
-            }
-        }
-
-        binding.btnImageGenerate.setOnClickListener {
-            if (binding.editSend.text.isBlank()) return@setOnClickListener
-            lifecycleScope.launch {
-                enableSendMessage(false)
-                val prompt = binding.editSend.text.toString()
-                adapter.addData("$IMAGE_START$prompt".toUserMessage())
-                generateImage(prompt)
-                enableSendMessage(true)
-            }
+        binding.tvMode.text = Mode.Chat.string
+        binding.tvMode.setOnClickListener {
+            XPopup.Builder(this)
+                .asBottomList(
+                    "模式选择",
+                    enumValues<Mode>().map { it.string }.toTypedArray()
+                ) { _, text ->
+                    binding.tvMode.text = text
+                }
+                .show()
         }
         binding.rv.itemAnimator = null
         binding.tvModel.text = RepUtils.modelString
@@ -207,10 +205,6 @@ class MainActivity : AppCompatActivity() {
     private fun enableSendMessage(isEnable: Boolean) {
         binding.btnSend.isEnabled = isEnable
         binding.btnSend.setImageResource(if (isEnable) R.drawable.baseline_send_24 else R.drawable.baseline_more_horiz_24)
-        binding.btnWeb.isEnabled = isEnable
-        binding.btnWeb.setImageResource(if (isEnable) R.drawable.baseline_search_24 else R.drawable.baseline_more_horiz_24)
-        binding.btnImageGenerate.isEnabled = isEnable
-        binding.btnImageGenerate.setImageResource(if (isEnable) R.drawable.baseline_image_24 else R.drawable.baseline_more_horiz_24)
     }
 
     private suspend fun generateResult(messages: MutableList<ChatMessage>) {
@@ -300,6 +294,20 @@ class MainActivity : AppCompatActivity() {
             })
         }
     }
+
+    enum class Mode(val string: String) {
+        Chat("文字"), ImageGenerate("图片生成")
+    }
+
+    private fun modeString2Value(string: String): Mode {
+        enumValues<Mode>().forEach {
+            if (it.string == string) return it
+        }
+        return Mode.Chat
+    }
+
+    private val curMode: Mode
+        get() = modeString2Value(binding.tvMode.text.toString())
 
     companion object {
         private const val IMAGE_START = "IMAGE:"

@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
+        app:layout_constraintBottom_toTopOf="@id/rv"
         app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -20,7 +21,7 @@
         android:layout_height="0dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toTopOf="@+id/layoutSend"
-        app:layout_constraintTop_toBottomOf="@+id/tvModel" />
+        app:layout_constraintTop_toBottomOf="@+id/btnClear" />
 
     <ImageButton
         android:id="@+id/btnClear"
@@ -31,38 +32,35 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
-        android:id="@+id/btnImageGenerate"
+        android:id="@+id/btnSetting"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/baseline_image_24"
-        app:layout_constraintBottom_toTopOf="@id/btnWeb"
-        app:layout_constraintRight_toRightOf="parent" />
+        android:src="@drawable/baseline_settings_24"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageButton
-        android:id="@+id/btnWeb"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/baseline_search_24"
-        app:layout_constraintBottom_toTopOf="@id/layoutSend"
-        app:layout_constraintRight_toRightOf="parent" />
 
     <LinearLayout
         android:id="@+id/layoutSend"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="bottom"
+        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent">
 
-        <ImageButton
-            android:id="@+id/btnSetting"
+        <TextView
+            android:id="@+id/tvMode"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/baseline_settings_24" />
+            android:drawableRight="@drawable/baseline_arrow_drop_down_24"
+            tools:text="文字" />
 
         <EditText
             android:id="@+id/editSend"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:maxLines="3" />
 
         <ImageButton
             android:id="@+id/btnSend"
