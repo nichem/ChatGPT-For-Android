@@ -21,6 +21,7 @@ import com.cjcrafter.openai.chat.ChatMessage
 import com.cjcrafter.openai.chat.ChatMessage.Companion.toAssistantMessage
 import com.cjcrafter.openai.chat.ChatMessage.Companion.toSystemMessage
 import com.cjcrafter.openai.chat.ChatMessage.Companion.toUserMessage
+import com.cjcrafter.openai.chat.ChatModel
 import com.cjcrafter.openai.chat.ChatRequest
 import com.cjcrafter.openai.chat.ChatUser
 import com.cjcrafter.openai.image.ImageFormat
@@ -73,12 +74,15 @@ class MainActivity : AppCompatActivity() {
                     sendMessage(binding.editSend.text.toString())
                     enableSendMessage(true)
                 }
+
                 Mode.ImageGenerate -> lifecycleScope.launch {
                     enableSendMessage(false)
                     val prompt = binding.editSend.text.toString()
-                    adapter.addData("$IMAGE_START$prompt".toUserMessage())
+                    binding.editSend.setText("")
+                    val engPrompt = translation(prompt)
+                    adapter.addData("$IMAGE_START$engPrompt".toUserMessage())
                     adapter.notifyDataSetChanged()
-                    generateImage(prompt)
+                    generateImage(engPrompt)
                     enableSendMessage(true)
                 }
             }
@@ -91,6 +95,7 @@ class MainActivity : AppCompatActivity() {
                     refresh()
                     enableSendMessage(true)
                 }
+
                 R.id.btnSave -> lifecycleScope.launch {
                     val loading = showLoading("保存中")
                     val chatMessage = adapter.data[pos]
@@ -187,9 +192,11 @@ class MainActivity : AppCompatActivity() {
                                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                                 .into(holder.getView(R.id.imageView))
                         }
+
                         ChatUser.USER -> {
                             holder.setText(R.id.tvContent, item.content)
                         }
+
                         else -> {
                             holder.setText(R.id.tvContent, item.content)
                             holder.setGone(
@@ -281,7 +288,6 @@ class MainActivity : AppCompatActivity() {
             .imageFormat(ImageFormat.BASE64)
             .imageSize(imageSizeString2Value(RepUtils.imageSizeString))
             .build()
-        binding.editSend.setText("")
         withContext(Default) {
             openAI?.imageGeneration(requestBase64, onResponse = {
                 val base64 = it.data[0].base64
@@ -316,6 +322,21 @@ class MainActivity : AppCompatActivity() {
 
     private val curMode: Mode
         get() = modeString2Value(binding.tvMode.text.toString())
+
+
+    private suspend fun translation(text: String): String {
+        val message = "翻译\"$text\"为英文,只返回结果，不要其他多余的回答。".toUserMessage()
+        val request = ChatRequest.builder()
+            .messages(mutableListOf(message))
+            .model(ChatModel.GPT_3_5_TURBO_0613.string)
+            .build()
+
+        return withContext(Default) {
+            val response = openAI?.createChatCompletion(request)
+            if (response == null) ""
+            else response.choices[0].message.content
+        }
+    }
 
     companion object {
         private const val IMAGE_START = "IMAGE:"
