@@ -72,7 +72,13 @@ object RepUtils {
             .addHeader("Authorization", apiKey)
             .post(FormBody.Builder().build())
             .build()
-        val res = withContext(Default) { okHttpClient.newCall(request).execute() }
+        val res = withContext(Default) {
+            try {
+                okHttpClient.newCall(request).execute()
+            } catch (e: Exception) {
+                null
+            }
+        } ?: return -1f
         val data = res.body?.string() ?: "{}"
 //        Log.d("dl", data)
         val total = try {
@@ -144,7 +150,7 @@ object RepUtils {
             return mmkv.decodeString("imageSizeString", DEFAULT_IMAGE_SIZE) ?: DEFAULT_IMAGE_SIZE
         }
         set(value) {
-            if(value in getImageSizeList()){
+            if (value in getImageSizeList()) {
                 mmkv.encode("imageSizeString", value)
             }
         }
