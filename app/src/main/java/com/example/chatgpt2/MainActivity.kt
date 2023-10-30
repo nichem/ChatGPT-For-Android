@@ -80,10 +80,15 @@ class MainActivity : AppCompatActivity() {
                     val prompt = binding.editSend.text.toString()
                     binding.editSend.setText("")
                     val engPrompt = translation(prompt)
-                    adapter.addData("$IMAGE_START$engPrompt".toUserMessage())
-                    adapter.notifyDataSetChanged()
-                    generateImage(engPrompt)
-                    enableSendMessage(true)
+                    if (engPrompt.isEmpty()) {
+                        enableSendMessage(true)
+                        ToastUtils.showShort("翻译接口出错")
+                    } else {
+                        adapter.addData("$IMAGE_START$engPrompt".toUserMessage())
+                        adapter.notifyDataSetChanged()
+                        generateImage(engPrompt)
+                        enableSendMessage(true)
+                    }
                 }
             }
         }
@@ -332,7 +337,11 @@ class MainActivity : AppCompatActivity() {
             .build()
 
         return withContext(Default) {
-            val response = openAI?.createChatCompletion(request)
+            val response = try {
+                openAI?.createChatCompletion(request)
+            } catch (e: Exception) {
+                null
+            }
             if (response == null) ""
             else response.choices[0].message.content
         }
